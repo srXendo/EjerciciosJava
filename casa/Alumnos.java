@@ -17,13 +17,8 @@ public class Alumnos {
     public void buscaAlumno(Scanner s){
         String nombreBuscar = this.pideNombreAlumno(s);
         System.out.println("Buscando...");
-        Boolean resultado = false;
-        for(String nombreAlumno: arrListAlumnos){
-            if(nombreAlumno.equals(nombreBuscar)){
-                resultado = true;
-            }
-        }
-        if(resultado){
+        String resultado = this.dameAlumnoSiExiste(nombreBuscar);
+        if(resultado != null){
             System.out.println("Alumno encontrado");
         }else{
             System.out.println("No se ha encontrado alumno");
@@ -32,20 +27,23 @@ public class Alumnos {
     public void eliminaAlumno(Scanner s){
         String nombreEliminar = this.pideNombreAlumno(s);
         System.out.println("Buscando...");
-        Boolean resultado = false;
-        for(String nombreAlumno: this.arrListAlumnos){
-            if(nombreAlumno.equals(nombreEliminar)){
-                resultado = true;
-            }
-        }
-
-        if(resultado){
+        String resultado = this.dameAlumnoSiExiste(nombreEliminar);
+        if(resultado != null){
             this.arrListAlumnos.remove(nombreEliminar);
             System.out.println("Alumno Eliminado");
         }else{
             System.out.println("No se ha encontrado alumno");
         }
     }
+    public String dameAlumnoSiExiste (String nombreAlumno){
+        String alumnoEncontrado = null; 
+        for(String alumno : this.arrListAlumnos){
+            if(alumno.equals(nombreAlumno)){
+                alumnoEncontrado = alumno;
+            }
+        }
+        return alumnoEncontrado;
+    } 
     public void muestraNumeroAlumnos(){
         System.out.println("Numero de alumnos: " + this.arrListAlumnos.size());
     }
