@@ -24,6 +24,7 @@ public class hashSetEjercicio2 {
             System.out.println("Nota    : " + alumnos.get(alumno));
             System.out.println("---------------------------------");
         }
+        teclado.close();
         
     }
     static public String dameNombre(Scanner s){
