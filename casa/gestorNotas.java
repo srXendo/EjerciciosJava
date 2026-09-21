@@ -51,16 +51,29 @@ public class gestorNotas {
                     alumnos.muestraInforme(teclado);
                     break;
 
+                //Muestra informe completo
+                case 4: 
+                    informeCompleto(alumnos);
+                    break;
+
                 //guardar datos    
-                case 4:
+                case 5:
                     guardaDatosAlumnos(fichero, alumnos);
                     break;
+                
+                
 
             }
         } while (option > 0);
         teclado.close();
     }
 
+    //muestra informe completo
+    static void informeCompleto(Alumnos alumnos){
+        for(String nombreAlumno: alumnos.mapAlumnos.keySet()){
+            alumnos.muestraInforme(nombreAlumno);
+        }
+    }
     //Recupera datos del fichero
     static Alumnos cargaDatos(File fichero) throws FileNotFoundException, IOException {
 
@@ -80,6 +93,7 @@ public class gestorNotas {
                         .add(notaReal);
 
             }
+            fila = lector.readLine();
 
         }
         lector.close();
@@ -100,7 +114,7 @@ public class gestorNotas {
                 }
                 linea = linea + notasAlumno.get(i);
             }
-            escritor.write(linea);
+            escritor.write(linea + "\n");
 
         }
         escritor.close();
@@ -129,7 +143,8 @@ public class gestorNotas {
         System.out.println(" 1. Añadir alumno");
         System.out.println(" 2. Añadir nota");
         System.out.println(" 3. Muestra informe de alumno");
-        System.out.println(" 4. Guardar");
+        System.out.println(" 4. Muestra informe completo");
+        System.out.println(" 5. Guardar");
         System.out.println("-------Menu-------");
         int option = s.nextInt();
         s.nextLine();
@@ -149,13 +164,16 @@ class Alumnos {
     public void addNota(Scanner s) {
         String nombre = this.pideNombreAlumno(s);
         creaAlumnoSiNoExiste(nombre);
+        
+        Double nota;
+        System.out.println("...Escribe -1 para salir...");
+        while((nota = this.pideNotaAlumno(s)) != -1){
+            this.mapAlumnos.get(nombre).add(nota);
+            System.out.printf("Nota añadida correctamente: %s ---- %f%n", nombre, nota);
+            
+        }
 
-        Double nota = this.pideNotaAlumno(s);
 
-        this.mapAlumnos.get(nombre).add(nota);
-
-        System.out.printf("Nota añadida correctamente: %s ---- %f%n", nombre, nota);
-        System.out.println(this.mapAlumnos);
     }
 
     public void creaAlumnoSiNoExiste(String nombre) {
@@ -192,7 +210,72 @@ class Alumnos {
         double minNota = 0;
         double maxNota = 0;
         double sumaNota = 0;
-        
+
+        for (double nota : arrayListNotas) {
+
+            if (sumaNota == 0) {
+                minNota = nota;
+                maxNota = nota;
+            }
+
+            sumaNota += nota;
+
+            //comprueba la nota minima y maxima
+            if (minNota > nota) {
+                minNota = nota;
+            }
+            if (maxNota < nota) {
+                maxNota = nota;
+            }
+
+            if (nota < 5) {
+                numSuspensos += 1;
+            } else {
+                numAprovados += 1;
+            }
+
+        }
+        mediaNotas = sumaNota / (double) arrayListNotas.size();
+
+        System.out.println("---------INFORME DE ALUMNO---------");
+        //nombreAlumno
+        System.out.printf("Nombre           : %s%n", nombreAlumno);
+
+        //numeroNotas
+        System.out.printf("numero de notas  : %d%n", arrayListNotas.size());
+
+        //mediaNotas
+        System.out.printf("media de notas   : %f%n", mediaNotas);
+
+        //numeroAprovadas
+        System.out.printf("Aprovados        : %d%n", numAprovados);
+
+        //numeroSuspensas
+        System.out.printf("Suspensas        : %d%n", numSuspensos);
+
+        //maxNota
+        System.out.printf("Nota maxima      : %f%n", maxNota);
+
+        //minNota
+        System.out.printf("Nota minima      : %f%n", minNota);
+
+        System.out.println("----------FIN DEL INFORME----------");
+
+    }
+
+    public void muestraInforme(String nombreAlumno) {
+
+        creaAlumnoSiNoExiste(nombreAlumno);
+
+        ArrayList<Double> arrayListNotas = this.mapAlumnos.get(nombreAlumno);
+
+        double mediaNotas = 0.0;
+        int numAprovados = 0;
+        int numSuspensos = 0;
+        double minNota = 0;
+        double maxNota = 0;
+        double sumaNota = 0;
+
         for (double nota : arrayListNotas) {
 
             if (sumaNota == 0) {
