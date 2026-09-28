@@ -64,3 +64,6 @@ public class Alumnos {
         return nombre;
     }
 }
+interface Alumno{
+    
+}
