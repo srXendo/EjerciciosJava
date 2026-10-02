@@ -22,57 +22,68 @@ public class Board{
         this.squaresMap.get(x).put(y, EnumSquareType.CLEAN);
 
     }
-    public char getCharacterFromXY(int x, int y){
+    public String getStringFromXY(int x, int y){
         EnumSquareType type = this.squaresMap.get(x).get(y);
-        char response;
+        String response;
         switch(type){
             case EnumSquareType.CLEAN:
-                response = '=';
+                response = "=";
                 break;
             case EnumSquareType.PLAYER:
-                response = '#';
+                response = EnumColors.VERDE+"#"+EnumColors.RESET;
                 break;    
             case EnumSquareType.EAT:
-                response = 'X'; 
+                response =  EnumColors.AZUL+"X"+EnumColors.RESET; 
                 break;
             case EnumSquareType.SHADOW:
-                response = '*';
+                response = EnumColors.VERDE+"*"+EnumColors.RESET;
                 break;     
             default: 
-                response = '?';
+                response = "?";
                 break;
         }
         return response;
     }
-    public void tick(){
+    public Boolean tick(){
+        this.playersMap.get(0).inTick = false;
         char direction = this.playersMap.get(0).direction;
+        Boolean isDead = false;
         switch(direction){
             case 'd': 
-                this.movePlayerRight(0);
+                if(direction != 'a'){
+                    isDead = this.movePlayerRight(0);
+                }
                 break;
             case 's':
-                this.movePlayerBottom(0);
+                if(direction != 'w'){
+                    isDead = this.movePlayerBottom(0);
+                }
                 break;
             case 'a':
-                this.movePlayerLeft(0);
+                if(direction != 'd'){
+                    isDead = this.movePlayerLeft(0);
+                }
                 break;
-            case 'w': 
-                this.movePlayerTop(0);
+            case 'w':
+                if(direction != 's'){ 
+                    isDead = this.movePlayerTop(0);
+                }
                 break;
             default:
                 break;
         }
+        return isDead;
     }
-    public void movePlayerRight(int idxPlayer){
+    public Boolean movePlayerRight(int idxPlayer){
         int yPos = this.playersMap.get(idxPlayer).yPos;
         int xPos = this.playersMap.get(idxPlayer).xPos;
         int newYPos = 0; 
         if(yPos + 1 < this.width){
             newYPos = yPos + 1;
         }
-        this.movePlayer(idxPlayer, xPos, newYPos);
+        return this.movePlayer(idxPlayer, xPos, newYPos);
     }
-    public void movePlayerBottom(int idxPlayer){
+    public Boolean movePlayerBottom(int idxPlayer){
         int yPos = this.playersMap.get(idxPlayer).yPos;
         int xPos = this.playersMap.get(idxPlayer).xPos;
         int newXPos = 0; 
@@ -80,34 +91,37 @@ public class Board{
             newXPos = xPos + 1;
         }
         
-        this.movePlayer(idxPlayer, newXPos, yPos);
+        return this.movePlayer(idxPlayer, newXPos, yPos);
     }
-    public void movePlayerLeft(int idxPlayer){
+    public Boolean movePlayerLeft(int idxPlayer){
         int yPos = this.playersMap.get(idxPlayer).yPos;
         int xPos = this.playersMap.get(idxPlayer).xPos;
         int newYPos = this.width - 1; 
         if(yPos - 1 >= 0){
             newYPos = yPos - 1;
         }
-        this.movePlayer(idxPlayer, xPos, newYPos);
+        return this.movePlayer(idxPlayer, xPos, newYPos);
     }
-    public void movePlayerTop(int idxPlayer){
+    public Boolean movePlayerTop(int idxPlayer){
         int yPos = this.playersMap.get(idxPlayer).yPos;
         int xPos = this.playersMap.get(idxPlayer).xPos;
         int newXPos = this.height - 1; 
         if(xPos - 1 >= 0){
             newXPos = xPos - 1;
         }
-        this.movePlayer(idxPlayer, newXPos, yPos);
+        return this.movePlayer(idxPlayer, newXPos, yPos);
     }    
-    public void movePlayer(int idxPlayer, int newXPos, int newYPos){
+    public Boolean movePlayer(int idxPlayer, int newXPos, int newYPos){
         Player curentPlayer = this.playersMap.get(idxPlayer);
+        int xOld = curentPlayer.getXPos();
+        int yOld = curentPlayer.getYPos();
         if(this.squaresMap.get(newXPos).get(newYPos) == EnumSquareType.EAT){
             curentPlayer.addPoint();
             this.addEat();
+        }else if(this.squaresMap.get(newXPos).get(newYPos) == EnumSquareType.SHADOW){
+            return true; 
         }
-        int xOld = curentPlayer.getXPos();
-        int yOld = curentPlayer.getYPos();
+
         
         curentPlayer.setNewPos(newXPos, newYPos);
         curentPlayer.updateShadow(xOld, yOld);
@@ -117,6 +131,7 @@ public class Board{
         }
         
         this.updateSquare(newXPos, newYPos, EnumSquareType.PLAYER);
+        return false;
     }
     public void updateShadows(Player currentPlayer){
         //clean shadow

@@ -6,9 +6,11 @@ public class Player{
     int xPos = 0;
     int yPos = 0;
     char direction = 'd';
+    char oldDirection = 'd';
     int point = 0;
     ArrayList<Integer[]> shadowsArr = new ArrayList<>();
     ArrayList<Integer[]> oldShadowsArr = new ArrayList<>();
+    Boolean inTick = false;
     
     public Player(int idPlayer, int xPos, int yPos){
         this.idPlayer = 0;
@@ -29,7 +31,6 @@ public class Player{
         if(this.point > 0){
             this.shadowsArr.add(xyArr);
         }
-        System.out.println("\n: " + this.shadowsArr.size());
 
         if(this.shadowsArr.size() > this.point){
             this.shadowsArr.remove(0);
@@ -49,7 +50,40 @@ public class Player{
         return this.yPos;
     }
     public void setDirection(char direction){
-        this.direction = direction;
+
+        switch(direction){
+            case 'd': 
+                if(!this.inTick && this.direction != 'a'){
+                    this.inTick = true;
+                    this.oldDirection = this.direction;
+                    this.direction = direction;
+                }
+                break;
+            case 's':
+                if(!this.inTick && this.direction != 'w'){
+                    this.inTick = true;
+                    this.oldDirection = this.direction;
+                    this.direction = direction;
+                }
+                break;
+            case 'a':
+                if(!this.inTick && this.direction != 'd'){
+                    this.inTick = true;
+                    this.oldDirection = this.direction;
+                    this.direction = direction;
+                }
+                break;
+            case 'w':
+                if(!this.inTick && this.direction != 's'){ 
+                    this.inTick = true;
+                    this.oldDirection = this.direction;
+                    this.direction = direction;
+                }
+                break;
+            default:
+                break;
+        }
+
     }
     public void addPoint(){
         this.point = this.point + 1;

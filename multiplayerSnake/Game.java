@@ -28,22 +28,28 @@ public class Game{
         }
     }
     public void drawBoard() throws InterruptedException{
-
-        while(true){
+        Boolean gameEnd = false;
+        while(!gameEnd){
             this.clearConsole();
-            this.board.tick();
+            gameEnd = this.board.tick();
+
             StringBuilder frame = new StringBuilder();
 
-            frame.append("\n\n------------------------------------------\n");
+            frame.append("------------------------------------------\n");
             for(int i = 0; i < this.height; i++){
                 for(int x = 0; x < this.width; x++){
-                    frame.append(this.board.getCharacterFromXY(i, x));
+                    frame.append(this.board.getStringFromXY(i, x));
                 }
                 frame.append("\n");
             }
             frame.append("------------------------------------------");
             System.out.print(frame.toString());
             Thread.sleep(1000/15); // 200 milisegundos
+        }
+        if(gameEnd){
+            System.out.println("\n\n\n ----------Fin de partida----------\n\n\n");
+            System.out.println("Puntuacion: " + this.board.playersMap.get(0).point);
+            System.out.println("\n\n\n ----------Fin de partida----------\n\n\n");
         }
     }
     public static void clearConsole() {
