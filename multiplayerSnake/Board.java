@@ -12,8 +12,16 @@ public class Board{
     public Board(int width, int height){
         this.width = width;
         this.height = height;
+        
+        
     }
-
+    public void createGrid(){
+        for(int i = 0; i < this.height; i++){
+            for(int x = 0; x < this.width; x++){
+                this.createAndAddSquare(i, x);
+            }
+        }
+    }
     public void createAndAddSquare(int x, int y){
         
         if (this.squaresMap.get(x) == null) {
@@ -145,8 +153,29 @@ public class Board{
         }
     }
     public void addPlayer(int idxPlayer){
-        this.playersMap.put(idxPlayer, new Player(idxPlayer, 0, 0));
+        int xPos = 0;
+        int yPos = 0;
+        Boolean centinele = false;
+        Random random = new Random();
+        while(!centinele){
+            
+            xPos = random.nextInt(this.height - 1); 
+            yPos = random.nextInt(this.width - 1);
+            try{
+                if(this.squaresMap.get(xPos).get(yPos) == EnumSquareType.CLEAN){
+                    centinele = true; 
+                }
+            }catch(Exception e){
+                System.out.print("centinele");
+            }
+        }
+        this.playersMap.put(idxPlayer, new Player(idxPlayer, xPos, yPos));
     }
+    
+    public void addPlayer(int idxPlayer, int xPosPlayer, int yPosPlayer){
+        this.playersMap.put(idxPlayer, new Player(idxPlayer, xPosPlayer, yPosPlayer));
+    }
+    
     public void updateSquare(int x, int y, EnumSquareType newType){
         this.squaresMap.get(x).replace(y, newType);
     }

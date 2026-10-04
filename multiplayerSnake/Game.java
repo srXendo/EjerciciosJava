@@ -15,18 +15,12 @@ public class Game{
 
     public void startGame() throws InterruptedException{
         this.iniciarControles();
-        this.createBoard();
+        this.board.createGrid();  
         this.board.addPlayer(0);
         this.board.addEat();
         this.drawBoard();
     }
-    public void createBoard(){
-        for(int i = 0; i < this.height; i++){
-            for(int x = 0; x < this.width; x++){
-                this.board.createAndAddSquare(i, x);
-            }
-        }
-    }
+
     public void drawBoard() throws InterruptedException{
         Boolean gameEnd = false;
         while(!gameEnd){
@@ -85,6 +79,21 @@ public class Game{
         Consumer<Character> tConsumer = (Character keyPressed) -> {
             this.board.inputPress(keyPressed);
         };
+        ventanaTeclado.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                char teclaPulsada = Character.toLowerCase(e.getKeyChar());
+                
+                tConsumer.accept(teclaPulsada);
+            }
+        });
+    }
+    public void iniciarControles(Consumer<Character> tConsumer) {
+        // 2. Creamos una ventana minúscula solo para capturar el teclado
+        JFrame ventanaTeclado = new JFrame("Controles");
+        ventanaTeclado.setSize(100, 100);
+        ventanaTeclado.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventanaTeclado.setVisible(true); // Déjala visible y haz clic en ella para jugar
         ventanaTeclado.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
