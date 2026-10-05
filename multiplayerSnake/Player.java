@@ -1,4 +1,5 @@
 
+import java.net.DatagramSocket;
 import java.util.ArrayList;
 
 public class Player{
@@ -11,12 +12,20 @@ public class Player{
     ArrayList<Integer[]> shadowsArr = new ArrayList<>();
     ArrayList<Integer[]> oldShadowsArr = new ArrayList<>();
     Boolean inTick = false;
-    
+    DatagramSocket socket;
+    String ip;
+    int port;
     public Player(int idPlayer, int xPos, int yPos){
         this.idPlayer = 0;
         this.xPos = xPos;
         this.yPos = yPos;
         this.direction = 'd';
+    }
+    public Player(int idPlayer, int xPos, int yPos, char direction){
+        this.idPlayer = 0;
+        this.xPos = xPos;
+        this.yPos = yPos;
+        this.direction = direction;
     }
 
     public void setNewPos(int newXPos, int newYPos){

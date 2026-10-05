@@ -38,7 +38,7 @@ public class Game{
             }
             frame.append("------------------------------------------");
             System.out.print(frame.toString());
-            Thread.sleep(1000/15); // 200 milisegundos
+            Thread.sleep(1000/15); 
         }
         if(gameEnd){
             System.out.println("\n\n\n ----------Fin de partida----------\n\n\n");

@@ -1,8 +1,13 @@
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Server {
     String nameServer;
@@ -10,15 +15,18 @@ public class Server {
 
     int width = 80;
     int height = 20;
-    HashMap<String, HashMap<Integer, Player>> playersMap = new HashMap<>();
+    HashMap<String, HashMap<Integer, MultiPlayer>> playersMap = new HashMap<>();
     Board board = new Board(width, height);
     public Server(String nameServer, String namePlayerMain){
         this.nameServer = nameServer;
         this.namePlayerMain = namePlayerMain;
         this.board.createGrid();
         
+        
     }
     public void listening(int port) {
+        this.startTickThread();
+
         try (DatagramSocket socket = new DatagramSocket(port)) {
 
             byte[] buffer = new byte[1024];
@@ -44,7 +52,7 @@ public class Server {
                         ":" + packet.getPort() +
                         " -> " + mensaje
                 );
-                String strResponse = this.handleMessage(mensaje, packet.getAddress().getHostAddress(), packet.getPort());
+                String strResponse = this.handleMessage(mensaje, packet.getAddress(), packet.getPort(), socket);
                 byte[] response = strResponse.getBytes(StandardCharsets.UTF_8);
                 DatagramPacket dataGramResponse = new DatagramPacket(
                         response,
@@ -53,14 +61,67 @@ public class Server {
                         packet.getPort()     // puerto del cliente
                 );
                 socket.send(dataGramResponse);
+
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    public String handleMessage(String msg, String ip, int port){
+        
+    public void startTickThread() {
+        Thread tickThread = new Thread(() -> {
+
+            while (true) {
+                try {
+                    this.tick();
+                    Thread.sleep(1000/15); // 20 ticks por segundo
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+
+        });
+
+        tickThread.start();
+    }
+    private void tick() throws IOException {
+
+        List <MultiPlayer> players = this.getArrPlayers();
+
+        String rows = players.stream().map(player->{
+            String row = "";
+            row +=player.idPlayer;
+            row +="//";
+            row +=player.xPos;
+            row +="//";
+            row +=player.yPos;
+            row +="//";
+            row +=player.direction;
+            return row;
+        }).collect(Collectors.joining(";;"));
+
+        byte[] tickMsg = rows.getBytes(StandardCharsets.UTF_8);
+
+        for (MultiPlayer player : players) {
+
+            DatagramPacket dataGramResponse = new DatagramPacket(
+                tickMsg,
+                tickMsg.length,
+                player.ip,
+                player.port
+            );
+
+            player.socket.send(dataGramResponse);
+        }
+    }
+    public String handleMessage(String msg, InetAddress ipInetAddress, int port, DatagramSocket socket){
         String response = "";
+        String ip = ipInetAddress.toString();
         String[] arrParamsMsg = msg.split(":");
         switch(arrParamsMsg[0]){
             case "GAME_DISCOVER" -> {
@@ -73,6 +134,7 @@ public class Server {
                 }
                 int xPos = 0;
                 int yPos = 0;
+                char direction;
                 if (this.playersMap.get(ip).get(port) == null) {
                     idxPlayer = this.playersMap.keySet().size() - 1;
 
@@ -90,18 +152,19 @@ public class Server {
                             System.out.print("centinele");
                         }
                     }
-                    this.playersMap.get(ip).put(port, new Player(idxPlayer, xPos, yPos));
+                    this.playersMap.get(ip).put(port, new MultiPlayer(idxPlayer, xPos, yPos, 'd', socket, ipInetAddress, port));
                 }
-
-                response = this.playersMap.get(ip).get(port).idPlayer + "//" + xPos + "//" + yPos;
+                direction = this.playersMap.get(ip).get(port).direction;
+                response = this.playersMap.get(ip).get(port).idPlayer + "//" + xPos + "//" + yPos + "//" + direction;
                 
                 for(String ipPlayer: this.playersMap.keySet()){
-                    if(ipPlayer.equals(ip)){
-                        continue;
-                    }
+   
                     for(int portPlayer: this.playersMap.get(ipPlayer).keySet()){
-                        Player player = this.playersMap.get(ipPlayer).get(portPlayer);
-                        response += ";;" + player.idPlayer + "//" + player.xPos + "//" + player.yPos;
+                        if(ipPlayer.equals(ip) && portPlayer == port ){
+                            continue;
+                        }
+                        MultiPlayer player = this.playersMap.get(ipPlayer).get(portPlayer);
+                        response += ";;" + player.idPlayer + "//" + player.xPos + "//" + player.yPos + "//" + direction;
                     }
                      
 
@@ -111,9 +174,22 @@ public class Server {
 
             }
             default -> {
-                System.out.println("[handleMessage] Paquete no reconocido: " + msg);
+                System.out.println("[ServerHandleMessage] Paquete no reconocido: " + msg);
             }
         }
         return response;
+    }
+    public ArrayList<MultiPlayer> getArrPlayers(){
+        ArrayList<MultiPlayer> players = new ArrayList<>(); 
+        for(String ipPlayer: this.playersMap.keySet()){
+
+            for(int portPlayer: this.playersMap.get(ipPlayer).keySet()){
+                MultiPlayer player = this.playersMap.get(ipPlayer).get(portPlayer);
+                players.add(player);
+            }
+                
+
+        }
+        return players;
     }
 }

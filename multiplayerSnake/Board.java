@@ -53,9 +53,10 @@ public class Board{
         return response;
     }
     public Boolean tick(){
-        this.playersMap.get(0).inTick = false;
+        
         Boolean isDead = false;
         for(int idx: this.playersMap.keySet()){
+            this.playersMap.get(idx).inTick = false;
             char direction = this.playersMap.get(idx).direction;
             
             switch(direction){
@@ -179,6 +180,9 @@ public class Board{
     
     public void addPlayer(int idxPlayer, int xPosPlayer, int yPosPlayer){
         this.playersMap.put(idxPlayer, new Player(idxPlayer, xPosPlayer, yPosPlayer));
+    }
+    public void addPlayer(int idxPlayer, int xPosPlayer, int yPosPlayer, char direction){
+        this.playersMap.put(idxPlayer, new Player(idxPlayer, xPosPlayer, yPosPlayer, direction));
     }
     
     public void updateSquare(int x, int y, EnumSquareType newType){
