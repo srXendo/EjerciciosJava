@@ -28,7 +28,11 @@ public class Game{
             gameEnd = this.board.tick();
 
             StringBuilder frame = new StringBuilder();
-
+            for(int idxPlayer : this.board.playersMap.keySet()){
+                Player player = this.board.playersMap.get(idxPlayer);
+                System.out.print("Puntuacion id:"+player.idPlayer+": " + player.point);
+            }
+            
             frame.append("------------------------------------------\n");
             for(int i = 0; i < this.height; i++){
                 for(int x = 0; x < this.width; x++){

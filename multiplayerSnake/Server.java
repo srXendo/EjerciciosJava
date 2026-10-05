@@ -4,8 +4,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 public class Server {
@@ -20,7 +20,6 @@ public class Server {
         this.nameServer = nameServer;
         this.namePlayerMain = namePlayerMain;
         this.board.createGrid();
-        
         
     }
     public void listening(int port) {
@@ -90,9 +89,9 @@ public class Server {
         tickThread.start();
     }
     private void tick() throws IOException {
-
-        List <MultiPlayer> players = this.getArrPlayers();
-
+        this.board.tick();
+        Collection <Player> players = this.board.playersMap.values();
+        
         players.stream().forEach(player->{
             String row = "";
             row +=player.idPlayer;
@@ -104,7 +103,7 @@ public class Server {
             row +=player.direction;
             byte[] tickMsg = row.getBytes(StandardCharsets.UTF_8);
             if(!row.equals("")){
-                players.stream().forEach(playerSend->{
+                this.getArrPlayers().stream().forEach(playerSend->{
                     try {
                         
                         DatagramPacket dataGramResponse = new DatagramPacket(
@@ -156,6 +155,7 @@ public class Server {
                         }
                     }
                     idxPlayer = this.getArrPlayers().size();
+                    this.board.addPlayer(idxPlayer, idxPlayer, idxPlayer, 'd');
                     this.playersMap.get(ip).put(port, new MultiPlayer(idxPlayer, xPos, yPos, 'd', socket, ipInetAddress, port));
                 }
                 direction = this.playersMap.get(ip).get(port).direction;
@@ -175,6 +175,7 @@ public class Server {
                 }
             }
             case "KEYPRESSED" -> {
+                this.board.playersMap.get(this.playersMap.get(ip).get(port).idPlayer).direction = arrParamsMsg[1].charAt(0);
                 this.playersMap.get(ip).get(port).direction = arrParamsMsg[1].charAt(0);
             }
             default -> {

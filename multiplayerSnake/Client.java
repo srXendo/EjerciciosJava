@@ -237,7 +237,9 @@ public class Client {
     }
     
     public void updateMultiplayerGame(int idx, int xPosPlayer, int yPosPlayer, char directionPlayer){
-        
+        if(this.game.board.playersMap.get(idx) == null){
+            this.game.board.addPlayer(idx, xPosPlayer, yPosPlayer, directionPlayer);
+        }
         this.game.board.movePlayer(idx, xPosPlayer, yPosPlayer);
     }
 }

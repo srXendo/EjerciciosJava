@@ -49,7 +49,7 @@ public class Player{
         if(this.shadowsArr.size() > this.point){
             this.shadowsArr.remove(0);
         }
-        System.out.println("Puntuacion: " + this.point);
+       
     }
     public int[] getPos(){
         int[] response = new int[2];
