@@ -184,12 +184,18 @@ public class Board{
     public void addPlayer(int idxPlayer, int xPosPlayer, int yPosPlayer, char direction){
         this.playersMap.put(idxPlayer, new Player(idxPlayer, xPosPlayer, yPosPlayer, direction));
     }
+    public void updatePlayer(int idxPlayer, int xPosPlayer, int yPosPlayer, char direction){
+        this.playersMap.get(idxPlayer).updatePlayer(xPosPlayer, yPosPlayer, direction);
+    }
     
     public void updateSquare(int x, int y, EnumSquareType newType){
         this.squaresMap.get(x).replace(y, newType);
     }
     public void inputPress(char keyPressed){
         this.playersMap.get(0).setDirection(keyPressed);
+    }
+    public void inputPress(int idxPlayer, char keyPressed){
+        this.playersMap.get(idxPlayer).setDirection(keyPressed);
     }
     public void addEat() {
         Random random = new Random();

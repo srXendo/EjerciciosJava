@@ -103,20 +103,22 @@ public class Server {
             row +="//";
             row +=player.direction;
             byte[] tickMsg = row.getBytes(StandardCharsets.UTF_8);
-
-            players.stream().forEach(playerSend->{
-                try {
-                    DatagramPacket dataGramResponse = new DatagramPacket(
-                        tickMsg,
-                        tickMsg.length,
-                        playerSend.ip,
-                        playerSend.port
-                    );
-                    playerSend.socket.send(dataGramResponse);
-                } catch (IOException ex) {
-                    System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                }
-            });
+            if(!row.equals("")){
+                players.stream().forEach(playerSend->{
+                    try {
+                        
+                        DatagramPacket dataGramResponse = new DatagramPacket(
+                            tickMsg,
+                            tickMsg.length,
+                            playerSend.ip,
+                            playerSend.port
+                        );
+                        playerSend.socket.send(dataGramResponse);
+                    } catch (IOException ex) {
+                        System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                    }
+                });
+            }
 
         });
     }
@@ -137,7 +139,7 @@ public class Server {
                 int yPos = 0;
                 char direction;
                 if (this.playersMap.get(ip).get(port) == null) {
-                    idxPlayer = this.playersMap.keySet().size() - 1;
+                    
 
                     Boolean centinele = false;
                     Random random = new Random();
@@ -153,6 +155,7 @@ public class Server {
                             System.out.print("centinele");
                         }
                     }
+                    idxPlayer = this.getArrPlayers().size();
                     this.playersMap.get(ip).put(port, new MultiPlayer(idxPlayer, xPos, yPos, 'd', socket, ipInetAddress, port));
                 }
                 direction = this.playersMap.get(ip).get(port).direction;

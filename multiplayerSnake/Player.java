@@ -16,18 +16,23 @@ public class Player{
     String ip;
     int port;
     public Player(int idPlayer, int xPos, int yPos){
-        this.idPlayer = 0;
+        this.idPlayer = idPlayer;
         this.xPos = xPos;
         this.yPos = yPos;
         this.direction = 'd';
     }
     public Player(int idPlayer, int xPos, int yPos, char direction){
-        this.idPlayer = 0;
+        this.idPlayer = idPlayer;
         this.xPos = xPos;
         this.yPos = yPos;
         this.direction = direction;
     }
+    public void updatePlayer(int xPos, int yPos, char direction){
 
+        this.xPos = xPos;
+        this.yPos = yPos;
+        this.direction = direction;
+    }
     public void setNewPos(int newXPos, int newYPos){
         this.xPos = newXPos;
         this.yPos = newYPos;
