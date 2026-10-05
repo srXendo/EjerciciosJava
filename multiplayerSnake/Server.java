@@ -94,6 +94,18 @@ public class Server {
                 }
 
                 response = this.playersMap.get(ip).get(port).idPlayer + "//" + xPos + "//" + yPos;
+                
+                for(String ipPlayer: this.playersMap.keySet()){
+                    if(ipPlayer.equals(ip)){
+                        continue;
+                    }
+                    for(int portPlayer: this.playersMap.get(ipPlayer).keySet()){
+                        Player player = this.playersMap.get(ipPlayer).get(portPlayer);
+                        response += ";;" + player.idPlayer + "//" + player.xPos + "//" + player.yPos;
+                    }
+                     
+
+                }
             }
             case "KEYPRESSED" -> {
 

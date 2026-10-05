@@ -101,12 +101,13 @@ public class Client {
                     response.getLength(),
                     StandardCharsets.UTF_8
             );
-
+            this.game.board.createGrid();
             this.socket = socket;
-            String[] info = mensaje.split("//");
-            this.idxPlayer = Integer.parseInt(info[0]);
-            this.xPosPlayer = Integer.parseInt(info[1]);
-            this.yPosPlayer = Integer.parseInt(info[2]);
+            String[] arrPlayerDataRows = mensaje.split(";;");
+            for(String rowPlayer : arrPlayerDataRows){
+                String[] info = rowPlayer.split("//");
+                this.addMultiplayerGame(Integer.parseInt(info[0]), Integer.parseInt(info[1]), Integer.parseInt(info[2]));
+            }
             this.ipPort = new IpPort(ip, port);
             return;
         }
@@ -139,8 +140,8 @@ public class Client {
         };
         this.game.iniciarControles(notifyServer);
         //this.game.createBoard();
-        this.game.board.createGrid();
-        this.addMultiplayerGame(this.idxPlayer, this.xPosPlayer, this.yPosPlayer);
+
+
         this.game.drawBoard();    
     }
 

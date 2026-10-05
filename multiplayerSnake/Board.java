@@ -54,33 +54,38 @@ public class Board{
     }
     public Boolean tick(){
         this.playersMap.get(0).inTick = false;
-        char direction = this.playersMap.get(0).direction;
         Boolean isDead = false;
-        switch(direction){
-            case 'd': 
-                if(direction != 'a'){
-                    isDead = this.movePlayerRight(0);
-                }
-                break;
-            case 's':
-                if(direction != 'w'){
-                    isDead = this.movePlayerBottom(0);
-                }
-                break;
-            case 'a':
-                if(direction != 'd'){
-                    isDead = this.movePlayerLeft(0);
-                }
-                break;
-            case 'w':
-                if(direction != 's'){ 
-                    isDead = this.movePlayerTop(0);
-                }
-                break;
-            default:
-                break;
+        for(int idx: this.playersMap.keySet()){
+            char direction = this.playersMap.get(idx).direction;
+            
+            switch(direction){
+                case 'd': 
+                    if(direction != 'a'){
+                        isDead = this.movePlayerRight(idx);
+                    }
+                    break;
+                case 's':
+                    if(direction != 'w'){
+                        isDead = this.movePlayerBottom(idx);
+                    }
+                    break;
+                case 'a':
+                    if(direction != 'd'){
+                        isDead = this.movePlayerLeft(idx);
+                    }
+                    break;
+                case 'w':
+                    if(direction != 's'){ 
+                        isDead = this.movePlayerTop(idx);
+                    }
+                    break;
+                default:
+                    break;
+            }
+                 
         }
         return isDead;
+
     }
     public Boolean movePlayerRight(int idxPlayer){
         int yPos = this.playersMap.get(idxPlayer).yPos;
