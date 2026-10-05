@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Server {
     String nameServer;
@@ -75,6 +74,7 @@ public class Server {
             while (true) {
                 try {
                     this.tick();
+
                     Thread.sleep(1000/15); // 20 ticks por segundo
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -93,7 +93,7 @@ public class Server {
 
         List <MultiPlayer> players = this.getArrPlayers();
 
-        String rows = players.stream().map(player->{
+        players.stream().forEach(player->{
             String row = "";
             row +=player.idPlayer;
             row +="//";
@@ -102,22 +102,23 @@ public class Server {
             row +=player.yPos;
             row +="//";
             row +=player.direction;
-            return row;
-        }).collect(Collectors.joining(";;"));
+            byte[] tickMsg = row.getBytes(StandardCharsets.UTF_8);
 
-        byte[] tickMsg = rows.getBytes(StandardCharsets.UTF_8);
+            players.stream().forEach(playerSend->{
+                try {
+                    DatagramPacket dataGramResponse = new DatagramPacket(
+                        tickMsg,
+                        tickMsg.length,
+                        playerSend.ip,
+                        playerSend.port
+                    );
+                    playerSend.socket.send(dataGramResponse);
+                } catch (IOException ex) {
+                    System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+            });
 
-        for (MultiPlayer player : players) {
-
-            DatagramPacket dataGramResponse = new DatagramPacket(
-                tickMsg,
-                tickMsg.length,
-                player.ip,
-                player.port
-            );
-
-            player.socket.send(dataGramResponse);
-        }
+        });
     }
     public String handleMessage(String msg, InetAddress ipInetAddress, int port, DatagramSocket socket){
         String response = "";
@@ -171,7 +172,7 @@ public class Server {
                 }
             }
             case "KEYPRESSED" -> {
-
+                this.playersMap.get(ip).get(port).direction = arrParamsMsg[1].charAt(0);
             }
             default -> {
                 System.out.println("[ServerHandleMessage] Paquete no reconocido: " + msg);

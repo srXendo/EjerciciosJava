@@ -109,18 +109,51 @@ public class Client {
             }
             this.ipPort = new IpPort(ip, port);
             Consumer<String> handlerMessagge = (tickMsg) -> {
-                this.handleMessage(tickMsg);
+                try {
+                    this.handleMessage(tickMsg);
+                } catch (InterruptedException ex) {
+                    System.getLogger(Client.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
 
             };
             new Thread(() -> listen(handlerMessagge)).start();
             return;
+
         }
         
 
     }
-    private void handleMessage (String tickMsg){
-        System.out.println("[handleMessage] tickMsg: " + tickMsg );
+    private void handleMessage (String tickMsg) throws InterruptedException{
+        //System.out.println("[handleMessage] tickMsg: " + tickMsg );
+        String[] row = tickMsg.split("//");
+        this.updateMultiplayerGame(Integer.parseInt(row[0]), Integer.parseInt(row[1]), Integer.parseInt(row[2]), row[3].charAt(0));
+
+        //this.drawBoard();
         
+    }
+    public void drawBoard() throws InterruptedException{
+        Boolean gameEnd = false;
+
+        this.game.clearConsole();
+        gameEnd = this.game.board.tick();
+
+        StringBuilder frame = new StringBuilder();
+
+        frame.append("------------------------------------------\n");
+        for(int i = 0; i < this.height; i++){
+            for(int x = 0; x < this.width; x++){
+                frame.append(this.game.board.getStringFromXY(i, x));
+            }
+            frame.append("\n");
+        }
+        frame.append("------------------------------------------");
+        System.out.print(frame.toString());
+
+        if(gameEnd){
+            System.out.println("\n\n\n ----------Fin de partida----------\n\n\n");
+            System.out.println("Puntuacion: " + this.game.board.playersMap.get(0).point);
+            System.out.println("\n\n\n ----------Fin de partida----------\n\n\n");
+        }
     }
     private void listen(Consumer<String> onMessage) {
 
@@ -151,7 +184,7 @@ public class Client {
     public void startMultiplayerGame() throws InterruptedException{
         Consumer<Character> notifyServer = (Character keyPressed) -> {
             this.game.board.inputPress(keyPressed);
-            byte[] data = ("KEYPRESSED:"+keyPressed).getBytes(StandardCharsets.UTF_8);
+            byte[] data = ("KEYPRESSED:" + keyPressed).getBytes(StandardCharsets.UTF_8);
             DatagramPacket packet;
             try {
                 packet = new DatagramPacket(
@@ -173,11 +206,16 @@ public class Client {
         };
         this.game.iniciarControles(notifyServer);
         //this.game.createBoard();
-        
-        this.game.drawBoard();    
+
+        this.game.drawBoard(); 
     }
 
     public void addMultiplayerGame(int idx, int xPosPlayer, int yPosPlayer, char directionPlayer){
+        this.game.board.addPlayer(idx, xPosPlayer, yPosPlayer, directionPlayer);
+        this.game.board.movePlayer(idx, xPosPlayer, yPosPlayer);
+    }
+    
+    public void updateMultiplayerGame(int idx, int xPosPlayer, int yPosPlayer, char directionPlayer){
         this.game.board.addPlayer(idx, xPosPlayer, yPosPlayer, directionPlayer);
         this.game.board.movePlayer(idx, xPosPlayer, yPosPlayer);
     }
