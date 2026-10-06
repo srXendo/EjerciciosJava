@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.function.Consumer;
 
 public class Client {
@@ -22,31 +23,62 @@ public class Client {
 
     }
     public ArrayList<String> search() throws Exception {
+
         ArrayList<String> gamesArrayList = new ArrayList<>();
+
+        byte[] data = "GAME_DISCOVER".getBytes(StandardCharsets.UTF_8);
+
         try (DatagramSocket socket = new DatagramSocket()) {
 
             socket.setBroadcast(true);
             socket.setSoTimeout(2000);
 
-            byte[] data = "GAME_DISCOVER".getBytes(StandardCharsets.UTF_8);
+            Enumeration<NetworkInterface> interfaces =
+                    NetworkInterface.getNetworkInterfaces();
 
-            DatagramPacket packet = new DatagramPacket(
-                    data,
-                    data.length,
-                    InetAddress.getByName("255.255.255.255"),
-                    DISCOVERY_PORT
-            );
+            while (interfaces.hasMoreElements()) {
 
-            socket.send(packet);
+                NetworkInterface networkInterface = interfaces.nextElement();
+
+                if (!networkInterface.isUp()
+                        || networkInterface.isLoopback()
+                        || networkInterface.isVirtual()) {
+                    continue;
+                }
+
+                for (InterfaceAddress interfaceAddress :
+                        networkInterface.getInterfaceAddresses()) {
+
+                    InetAddress broadcast =
+                            interfaceAddress.getBroadcast();
+
+                    if (broadcast == null) {
+                        continue;
+                    }
+
+
+                    DatagramPacket packet = new DatagramPacket(
+                            data,
+                            data.length,
+                            broadcast,
+                            DISCOVERY_PORT
+                    );
+
+                    socket.send(packet);
+                }
+            }
 
             byte[] buffer = new byte[1024];
-            
+
             while (true) {
+
                 DatagramPacket response =
                         new DatagramPacket(buffer, buffer.length);
 
                 try {
+
                     socket.receive(response);
+
                 } catch (SocketTimeoutException e) {
                     break;
                 }
@@ -57,9 +89,17 @@ public class Client {
                         response.getLength(),
                         StandardCharsets.UTF_8
                 );
-                gamesArrayList.add(response.getAddress().getHostAddress() + ":" + response.getPort() + ":" + mensaje);
+
+                gamesArrayList.add(
+                        response.getAddress().getHostAddress()
+                                + ":"
+                                + response.getPort()
+                                + ":"
+                                + mensaje
+                );
             }
         }
+
         return gamesArrayList;
     }
     public void connectGame(String ipPort) throws SocketException, UnknownHostException, IOException{
