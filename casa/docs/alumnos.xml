@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<alumnos>
+    <alumno id="1">
+        <nombre>Alfredo</nombre>
+        <edad>21</edad>
+        <telefono>+34666666666</telefono>
+        <curso>Java</curso>
+        <nota>9.0</nota>
+    </alumno>
+    <alumno id="2">
+        <nombre>Alfredo</nombre>
+        <edad>21</edad>
+        <telefono>+34666666666</telefono>
+        <curso>Java</curso>
+        <nota>9.0</nota>
+    </alumno>
+    <alumno id="3">
+        <nombre>Alfredo</nombre>
+        <edad>21</edad>
+        <telefono>+34666666666</telefono>
+        <curso>Java</curso>
+        <nota>9.0</nota>
+    </alumno>
+</alumnos>
