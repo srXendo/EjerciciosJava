@@ -1,5 +1,6 @@
 
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 public class Player{
@@ -13,7 +14,7 @@ public class Player{
     ArrayList<Integer[]> oldShadowsArr = new ArrayList<>();
     Boolean inTick = false;
     DatagramSocket socket;
-    String ip;
+    InetAddress ip;
     int port;
     public Player(int idPlayer, int xPos, int yPos){
         this.idPlayer = idPlayer;
@@ -63,6 +64,9 @@ public class Player{
     public int getYPos(){
         return this.yPos;
     }
+    public int getPoint(){
+        return this.point;
+    }
     public void setDirection(char direction){
 
         switch(direction){
@@ -102,5 +106,7 @@ public class Player{
     public void addPoint(){
         this.point = this.point + 1;
     }
-    
+    public void setPoint(int point){
+        this.point = this.point;
+    }
 }

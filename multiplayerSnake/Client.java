@@ -164,12 +164,28 @@ public class Client {
         //System.out.println("[handleMessage] tickMsg: " + tickMsg );
         String[] row = tickMsg.split("//");
         //System.out.println("row: " + row.length + " " + tickMsg);
-        if(row.length > 1){
-            this.updateMultiplayerGame(
-                Integer.parseInt(row[0]),
-                Integer.parseInt(row[1]),
-                Integer.parseInt(row[2]),
-                row[3].charAt(0));
+        if(row.length > 0){
+            switch(row[0]){
+                case "player" -> {
+                    this.updateMultiplayerGame(
+                        Integer.parseInt(row[1]),
+                        Integer.parseInt(row[2]),
+                        Integer.parseInt(row[3]),
+                        row[4].charAt(0)
+                    );
+                    System.out.print("Player update: " + Integer.parseInt(row[1]));
+                }
+                case "eat" -> {
+                    
+                    this.game.board.updateSquare(Integer.parseInt(row[1]), Integer.parseInt(row[2]), EnumSquareType.EAT);
+                }
+                case "playerPoint" -> {
+                    this.game.board.playersMap.get(Integer.valueOf(row[1])).setPoint(Integer.parseInt(row[4]));    
+                    this.game.board.updateSquare(Integer.parseInt(row[2]), Integer.parseInt(row[3]), EnumSquareType.CLEAN);
+                }
+                
+            }
+
         }
 
         //this.drawBoard();
@@ -197,6 +213,7 @@ public class Client {
             System.out.println("\n\n\n ----------Fin de partida----------\n\n\n");
             System.out.println("Puntuacion: " + this.game.board.playersMap.get(this.idxPlayer).point);
             System.out.println("\n\n\n ----------Fin de partida----------\n\n\n");
+            this.game.board.playersMap.get(this.idxPlayer).setPoint(0);
         }
     }
     private void listen(Consumer<String> onMessage) {

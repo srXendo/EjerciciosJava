@@ -6,7 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Server {
     String nameServer;
@@ -14,12 +16,16 @@ public class Server {
 
     int width = 80;
     int height = 20;
+    int[] eatPos = new int[2];
     HashMap<String, HashMap<Integer, MultiPlayer>> playersMap = new HashMap<>();
-    Board board = new Board(width, height);
+    Board board;
     public Server(String nameServer, String namePlayerMain){
         this.nameServer = nameServer;
         this.namePlayerMain = namePlayerMain;
+        this.board = new Board(width, height, this::notifyPoint);
         this.board.createGrid();
+        this.eatPos = this.board.addEat();
+
         
     }
     public void listening(int port) {
@@ -88,38 +94,75 @@ public class Server {
 
         tickThread.start();
     }
+    public void notifyPoint(String infoString){
+        String[] infoRow = infoString.split("//");
+        int idxPlayer = Integer.parseInt(infoRow[0]);
+        int xPos = Integer.parseInt(infoRow[1]);
+        int yPos = Integer.parseInt(infoRow[2]);
+        int point = Integer.parseInt(infoRow[3]);
+
+        this.getArrPlayers().stream().forEach(playerSend->{
+            try {
+                String eatStrMsg = "playerPoint//" + infoString;
+                byte[] eatMsg = eatStrMsg.getBytes(StandardCharsets.UTF_8);
+                DatagramPacket dataGramResponse = new DatagramPacket(
+                    eatMsg,
+                    eatMsg.length,
+                    playerSend.ip,
+                    playerSend.port
+                );
+                playerSend.socket.send(dataGramResponse);
+            } catch (IOException ex) {
+                System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            }
+        }); 
+    }
     private void tick() throws IOException {
         this.board.tick();
         Collection <Player> players = this.board.playersMap.values();
-        
-        players.stream().forEach(player->{
-            String row = "";
-            row +=player.idPlayer;
-            row +="//";
-            row +=player.xPos;
-            row +="//";
-            row +=player.yPos;
-            row +="//";
-            row +=player.direction;
-            byte[] tickMsg = row.getBytes(StandardCharsets.UTF_8);
-            if(!row.equals("")){
-                this.getArrPlayers().stream().forEach(playerSend->{
-                    try {
-                        
-                        DatagramPacket dataGramResponse = new DatagramPacket(
-                            tickMsg,
-                            tickMsg.length,
-                            playerSend.ip,
-                            playerSend.port
-                        );
-                        playerSend.socket.send(dataGramResponse);
-                    } catch (IOException ex) {
-                        System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                    }
-                });
-            }
+        List<byte[]> rows = players.stream()
+            .map(player -> {
+                String row = "player//" + player.idPlayer + "//" + player.xPos + "//" + player.yPos + "//" + player.direction;
+                return row.getBytes(StandardCharsets.UTF_8);
+            })
+            .collect(Collectors.toList());
+        for(byte[] row : rows){
+            players.stream().forEach(player->{
+                byte[] tickMsg = row;
+                if(row.length > 0){
+                    this.getArrPlayers().stream().forEach(playerSend->{
+                        try {
+                            
+                            DatagramPacket dataGramResponse = new DatagramPacket(
+                                tickMsg,
+                                tickMsg.length,
+                                playerSend.ip,
+                                playerSend.port
+                            );
+                            playerSend.socket.send(dataGramResponse);
+                        } catch (IOException ex) {
+                            System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                        }
+                    });
+                }
 
-        });
+            });
+            this.getArrPlayers().stream().forEach(playerSend->{
+                try {
+                    String eatStrMsg = "eat//" + this.eatPos[0] + "//" + this.eatPos[1];
+                    byte[] eatMsg = eatStrMsg.getBytes(StandardCharsets.UTF_8);
+                    DatagramPacket dataGramResponse = new DatagramPacket(
+                        eatMsg,
+                        eatMsg.length,
+                        playerSend.ip,
+                        playerSend.port
+                    );
+                    playerSend.socket.send(dataGramResponse);
+                } catch (IOException ex) {
+                    System.getLogger(Server.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                }
+            });    
+        }
     }
     public String handleMessage(String msg, InetAddress ipInetAddress, int port, DatagramSocket socket){
         String response = "";

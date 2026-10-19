@@ -105,3 +105,4 @@ INSERT INTO innova_formacion.matriculas values(3, 2, 2, '2026-08-15', 9.25);
 INSERT INTO innova_formacion.matriculas values(4, 3, 2, '2026-08-16', 7.00);
 INSERT INTO innova_formacion.matriculas values(5, 4, 3, '2026-08-18', NULL);
 INSERT INTO innova_formacion.matriculas values(6, 5, 4, '2026-08-20', 6.50);
+

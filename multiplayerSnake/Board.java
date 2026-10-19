@@ -3,16 +3,26 @@
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class Board{
     Map<Integer, Map<Integer, EnumSquareType>> squaresMap = new HashMap<>();
     Map<Integer, Player> playersMap = new HashMap<>();
     int width = 0;
     int height = 0;
+    int eatXPos = 0;
+    int eatYPos = 0;
+    Consumer<String> actionTickConsumer;
     public Board(int width, int height){
         this.width = width;
         this.height = height;
         
+        
+    }
+    public Board(int width, int height, Consumer<String> actionTickConsumer){
+        this.width = width;
+        this.height = height;
+        this.actionTickConsumer = actionTickConsumer;
         
     }
     public void createGrid(){
@@ -88,6 +98,7 @@ public class Board{
         return isDead;
 
     }
+    
     public Boolean movePlayerRight(int idxPlayer){
         int yPos = this.playersMap.get(idxPlayer).yPos;
         int xPos = this.playersMap.get(idxPlayer).xPos;
@@ -129,9 +140,18 @@ public class Board{
         Player curentPlayer = this.playersMap.get(idxPlayer);
         int xOld = curentPlayer.getXPos();
         int yOld = curentPlayer.getYPos();
+        int point = curentPlayer.getPoint();
         if(this.squaresMap.get(newXPos).get(newYPos) == EnumSquareType.EAT){
-            curentPlayer.addPoint();
-            this.addEat();
+            if (this.actionTickConsumer != null) {
+                this.actionTickConsumer.accept(idxPlayer+"//"+newXPos+"//"+newYPos + "//" + point);
+            }else{
+                curentPlayer.addPoint();
+                this.addEat();
+            }
+            
+
+            
+
         }else if(this.squaresMap.get(newXPos).get(newYPos) == EnumSquareType.SHADOW){
             return true; 
         }
@@ -197,7 +217,7 @@ public class Board{
     public void inputPress(int idxPlayer, char keyPressed){
         this.playersMap.get(idxPlayer).setDirection(keyPressed);
     }
-    public void addEat() {
+    public int[] addEat() {
         Random random = new Random();
         boolean centinele = false;
         int xPos = 0;
@@ -214,7 +234,9 @@ public class Board{
                 System.out.print("centinele");
             }
         }
-
+        this.eatXPos = xPos;
+        this.eatXPos = yPos;
         this.updateSquare(xPos, yPos, EnumSquareType.EAT);
+        return new int[]{xPos, yPos};
     }
 }
